@@ -1,0 +1,20 @@
+{
+  "name": "@apatheticwes/validation",
+  "version": "1.0.0",
+  "description": "An alternative to other schema-based validation libraries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "validation",
+    "vue",
+    "vue3",
+    "schema"
+  ],
+  "author": "wes hatch",
+  "license": "MIT",
+  "dependencies": {
+    "@vuelidate/validators": "^2.0.0-alpha.5"
+  }
+}
