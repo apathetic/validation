@@ -1,5 +1,5 @@
 // https://github.com/vuelidate/vuelidate/tree/next/packages/validators
-import { email, required, date /* sameAs, minLength */, helpers } from '@vuelidate/validators/dist';
+import { email, required /* sameAs, minLength */, helpers } from '@vuelidate/validators/dist/index.esm';
 import { Validator } from './types';
 
 
@@ -18,7 +18,6 @@ export {
   // simple
   required,
   email,
-  date,
 
   // complex (depend on args or context)
   minLength,

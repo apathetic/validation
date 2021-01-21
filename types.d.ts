@@ -1,4 +1,4 @@
-import { Ref } from '@vue/composition-api';
+import { Ref } from 'vue-demi';
 
 
 export interface UseValidation<S, V> {
@@ -14,7 +14,7 @@ export type ValidationSchema = SchemaRules | SchemaValues;
 
 interface SchemaRules {
   [fieldName: string]: Record<string, Validator>;
-};
+}
 
 interface SchemaValues {
   [fieldName: string]: {
@@ -26,7 +26,7 @@ interface SchemaValues {
 export interface Validator {
   $validator: (value: any, context?) => boolean;
   $message: string;
-};
+}
 
 
 // Form validation types

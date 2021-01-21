@@ -5,7 +5,6 @@ export default useValidation;
 export const {
   required,
   email,
-  date,
   //
   minLength,
   sameAs,

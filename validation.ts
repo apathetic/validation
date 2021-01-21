@@ -17,7 +17,7 @@
 
  */
 
-import { ref, reactive, computed, isRef } from '@vue/composition-api';
+import { ref, reactive, computed, isRef } from 'vue-demi';
 import { ValidationSchema, ValidationGroup, ValidationField, UseValidation } from './types';
 
 /**
@@ -31,7 +31,7 @@ function unwrap (val) {
 }
 
 
-export default function useValidation<S, V>(schema: S, values?: V): UseValidation<S, V> {
+export default function useValidation<S, V>(schema: ValidationSchema, values?: any): UseValidation<S, V> {
   let form = {};
 
   if (values) {
@@ -47,7 +47,7 @@ export default function useValidation<S, V>(schema: S, values?: V): UseValidatio
   * @param {object?} values An data object of the fields to be validated.
   * @returns {ValidationGroup}
   */
-  function buildGroup(schema: ValidationSchema, values): ValidationGroup {
+  function buildGroup(schema, values): ValidationGroup {
     const group: Record<string, ValidationField> = {};
     const validations: ValidationField[] = [];
     let $dirty;
