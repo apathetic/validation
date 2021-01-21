@@ -14,10 +14,10 @@ It requires a set of `values` (ie. component data) and `rules` to validate the t
   - optionally, sweep away both rules and values into a schema config (for a very lean component)
 - Reactive. Validation reacts to user input
 - Extensible. Easy to override and add new rules
-- Utilizes prior art. No need to author a new framework from scratch
+- Utilizes prior art. Validators from Vuelidate are leveraged; no need to reinvent the wheel
 - De-coupled. The reactive form-object can be injected _directly into the middleware_
-  - In the middleware a `server-generated` error (in the JSON error format) may be used to _hydrate_ the validation object <sup>(now, we see how these prior efforts are coming together...)</sup>
-- Optionated. May be _tightly integrated_ with the ZigZag UI. For example:
+  - In the middleware a `server-generated` error (in the JSON error format) may be used to _hydrate_ the validation object
+- Optionated. May be _tightly integrated_ with the [ZigZag UI](https://github.com/apathetic/zigzag-ui). For example:
   - Dedicated wrappers (or "validation providers") such as `z-field`.
 - Front-end / back-end "agnostic". The form-object can consume validation errors generated on either client or server
 - Future-looking. Leverages Vue 3 composition API
