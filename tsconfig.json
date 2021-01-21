@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "es2020",
+      "esnext.asynciterable",
+      "dom"
+    ],
+    "module": "ES6",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "target": "esnext",
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

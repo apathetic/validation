@@ -1,6 +1,6 @@
 # Validation
 
-> A schema-driven validation framework for Vue, providing reactive, client-side validation.
+> A schema-driven validation framework for Vue 3, providing reactive, client-side validation.
 
 The Validation composable is a _reactive form object_. This object is consumed by the page component and used in its template, where it will automatically validate any user-entered data.
 
@@ -94,7 +94,7 @@ beforeCreate() {
 
 `useValidation` creates a reactive `form` _validation_ object. The returned object matches the same shape as the validation schema, except each field will be decorated/returned as follows:
 
-* There will be five (5) _core_ properties: `$model`, `$error`, `$dirty`, `$invalid` and `$errors`.
+* There are be five (5) _core_ properties: `$model`, `$error`, `$dirty`, `$invalid` and `$errors`.
 
 ```
   "$model": "horace",
@@ -104,7 +104,7 @@ beforeCreate() {
   "$errors": [ ... ]
 ```
 
-* There will be _dynamic_ properties for each specific validation rule added (i.e. `required`, `email`, etc)
+* There are be _dynamic_ properties for each specific validation rule added (i.e. `required`, `email`, etc)
 ```
   // validation props. These are dynamic:
   "required": true,   // passes required check
@@ -113,21 +113,18 @@ beforeCreate() {
   ...
 ```
 
-
-### Validation usage in template
-
-TODO. See Storybook for now.
+Note the similarities with [vuelidate](https://github.com/vuelidate), from which this structure was borrowed.
 
 
 ## Portability
 
 Once created, the composable creates a reactive object representating a component's data. Reactive validation bindings will automically update if any data field is updated, and can be surfaced in the template.
 
-Note though, that it is equally possible to export the composable to the middleware, where it may be used to hydrate server-side errors; any field or validation that is then updated here will automatically be surfaced in the template where it is used.
+Note though, that it is equally possible to export the composable to the middleware where it may be used to hydrate server-side errors; any field or validation that is then updated here will automatically be surfaced in the template where it is used.
 
-First, we create the validation object. We'll inject both rules and values for simplicity:
+First, we create the validation object:
 
-```
+``` js
 // schemas/index
 const schema = { ... };
 const values = { ... };
@@ -136,9 +133,9 @@ const exampleForm = useValidation(schema, values);
 export { exampleForm };
 ```
 
-Then, in an action
+We'd use the `exampleForm` in a page component as normal, but also, in an action:
 
-```
+``` js
 export const exampleAction = async ({ commit }) => {
   try {
     const exampleData = await api.settings.getExampleData();
@@ -151,20 +148,34 @@ export const exampleAction = async ({ commit }) => {
   }
 };
 ```
-...note that we conditionally load the module and hydrate it upon any error(s) originating from the server. That's it, we can now surface server errors anywhere in the page.  If the server response is in the JSON-error format, the framework will unwrap it and apply it to the corresponding field in the template automatically.
+Here, we conditionally load the module and hydrate it upon any error(s) originating from the server. That's it! We can now surface _server errors_ anywhere in the page, without needed any conditional logic in the page or elsewhere.  If the server response is in the JSON-error format, the framework will unwrap it and even apply it to the corresponding field in the template automatically.
 
 
 ## z-field
 
 The `z-field` component may be used as a field wrapper. It accepts `errors` array from validation rules, or even a single `errors[0].$message` if desired. `z-field` can wrap any other UI components, and act as a decorator for error feedback.
 
+``` html
+  <z-field
+    v-for="(field, key, index) in form"
+    :key="'field-' + key"
+    :label="key"
+    :errors="field.$errors"
+    :hint="'Type in something for ' + key"
+  >
+    <input v-model="field.$model" />
+  </z-field>
+```
 
+## Notes
+
+When `npm i`, you'll need to use the `--force` option, as a peer dependency in `vuelidate/validators` does not correctly resolve.
 
 ## References:
 
 `Validatable` draws inspiration from multiple sources.
 
-(Vue Composable)[https://pikax.me/vue-composable/composable/validation/validation.html]: Vue 3 composition API approach to
-(Vee Validate)[https://logaretm.github.io/vee-validate/]: Vue 3 composition API + "validation provider" component
-(Vuelidate)[https://github.com/vuelidate/vuelidate/blob/master/src/index.js] for model based validation
-(Vuetify)[https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/mixins/validatable/index.ts]: Array validation approach
+[Vue Composable](https://pikax.me/vue-composable/composable/validation/validation.html): Vue 3 composition API approach to
+[Vee Validate](https://logaretm.github.io/vee-validate/): Vue 3 composition API + "validation provider" component
+[Vuelidate](https://github.com/vuelidate/vuelidate/blob/master/src/index.js) for model based validation
+[Vuetify](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/mixins/validatable/index.ts): Array validation approach
