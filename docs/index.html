@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Validation</title>
+  <meta name="viewport" content="width=device-width">
+
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- demo stuffs -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://apathetic.github.io/showcase/assets/css/main.min.css">
+  <!-- end demo stuffs -->
+</head>
+
+<body>
+  <header class="py-2 align-center">
+    <h1>Validation</h1>
+  </header>
+
+  <nav class="mini-nav">
+    <div id="sticky">
+      <ul class="py-2" data-autogenerate="true">
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section data-nav="About" id="about">
+      <div class="container">
+        <h2>Overview</h2>
+        <p><em>A lightweight, schema-based validation composable for Vue 3. It takes a more holistic approach to asynchronous validation.</em></p>
+        <h4>At a Glance</h3>
+        <ul class="bullets">
+          <li><strong>Schema-based</strong>. Import rules and structure, keeping the component lean</li>
+          <li><strong>Flexible</strong>. Simply provide the validation composable with rules + values
+            <ul>
+              <li>no "black box" set up: use the component's <code>data</code> directly and provide rules elsewhere. Or:</li>
+              <li>lean: sweep away both rules and values into a schema config</li>
+            </ul>
+          </li>
+          <li><strong>Reactive</strong>. User input triggers validation updates and display</li>
+          <li><strong>Extensible</strong>. Easy to override and add new rules</li>
+          <li><strong>De-coupled</strong>. The reactive form-object can be injected <em>directly into your actions</em>
+          <li><strong>Agnostic</strong>. Can consume validation errors generated on either client or server
+            <ul>
+              <li>client-side: validators from <a href="https://github.com/vuelidate/vuelidate/tree/next/packages/validators">Vuelidate</a> are leveraged, sharing prior-art</li>
+              <li>server errors: may also be used to hydrate the validation composable. Uses the <a href="https://jsonapi.org/format/#error-objects">JSON error format</a> by default</li>
+            </ul>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+  <!--
+    <section data-nav="Getting Started" id="getting-started">
+      <div class="container">
+        <h2>Getting Started</h2>
+
+        <p>The Validation composable is a _reactive form object_. This object is consumed by the page component and used in its template, where it will automatically validate any user-entered data.</P>
+        <p>It requires a set of `values` (ie. component data) and `rules` to validate the them. The rules are a JSON-schema that define which inputs on a page need validation, and how</p>
+
+
+
+      Setting up a validation _schema_ is easy and flexible enough to handle a variety of use-cases.
+
+      <h4>Option 1</h4>
+
+      - set up the `values` and their validation `rules` in an external schema, and import it.
+
+      ```
+      // schemas/validation.js
+      const coolSchema = { ... };
+      const coolValues = { ... };
+
+      export function useCoolFormValidation() {
+        return useValidation(coolSchema, coolValues);
+      }
+      ```
+
+      ```
+      // coolComponent.vue
+      import { useCoolFormValidation } from '@/schemas';
+
+      const { form } = useCoolFormValidation();
+
+      ...
+      computed() {
+        form: () => form
+      }
+      ```
+
+      The advantage in this set-up is simplicity; the disadvantage is that the component's values are not readily visible to the developer, which may be opaque in the template.
+
+      ### Option 2
+
+      - use your page component's data as `values`.
+      - define the validation schema externally and "curry" them into the `useValidation` composable
+      - use the `setValues` helper from the composable to asynchronously add values when they're available
+
+      ```
+      // schemas/index.js
+      const coolSchema = { ... };
+      export function useCoolFormValidationNoValues() {
+        return useValidation(coolSchema);
+      }
+      ```
+
+      ```
+      // coolComponent.vue
+      import { useCoolFormValidationNoValues } from '@/schemas';
+      const { form, setValues } = useCoolFormValidationNoValues();
+
+      ...
+      data() ({
+        values: {
+          name: '',
+          email: '',
+        }
+      }),
+
+      beforeCreate() {
+        // minor shortcut:
+        // after `setValues`, we make `form` a computed prop in the template while we're at it
+        this.$options.computed.form = setValues(this.values);
+      }
+      ```
+      </div>
+    </section>
+
+    <section data-nav="Validation" id="validation">
+
+      ## Validation object
+
+      `useValidation` creates a reactive `form` _validation_ object. The returned object matches the same shape as the validation schema, except each field will be decorated/returned as follows:
+
+      * There are be five (5) _core_ properties: `$model`, `$error`, `$dirty`, `$invalid` and `$errors`.
+
+      ```
+        "$model": "horace",
+        "$error": false, // helper for: $invalid && $dirty
+        "$dirty": false,
+        "$invalid": false,
+        "$errors": [ ... ]
+      ```
+
+      * There are be _dynamic_ properties for each specific validation rule added (i.e. `required`, `email`, etc)
+      ```
+        // validation props. These are dynamic:
+        "required": true,   // passes required check
+        "minLength": false, // does not meet minLength criteria
+        "email": true,      // passes email validation
+        ...
+      ```
+
+      Note the similarities with [vuelidate](https://github.com/vuelidate), from which this structure was borrowed.
+
+
+    </section>
+
+    <section data-nav="Other Details" id="other-details">
+
+      ## Portability
+
+      Once created, the composable creates a reactive object representating a component's data. Reactive validation bindings will automically update if any data field is updated, and can be surfaced in the template.
+
+      Note though, that it is equally possible to export the composable to the middleware where it may be used to hydrate server-side errors; any field or validation that is then updated here will automatically be surfaced in the template where it is used.
+
+      First, we create the validation object:
+
+      ``` js
+      // schemas/index
+      const schema = { ... };
+      const values = { ... };
+      const exampleForm = useValidation(schema, values);
+
+      export { exampleForm };
+      ```
+
+      We'd use the `exampleForm` in a page component as normal, but also, in an action:
+
+      ``` js
+      export const exampleAction = async ({ commit }) => {
+        try {
+          const exampleData = await api.settings.getExampleData();
+          ...
+        } catch (error) {
+          import('@/schemas/exampleForm') // WEBPACK conditional import.
+            .then((exampleForm) => {
+              exampleForm.setErrors(error);
+            });
+        }
+      };
+      ```
+      Here, we conditionally load the module and hydrate it upon any error(s) originating from the server. That's it! We can now surface _server errors_ anywhere in the page, without needed any conditional logic in the page or elsewhere.  If the server response is in the JSON-error format, the framework will unwrap it and even apply it to the corresponding field in the template automatically.
+
+
+      ## z-field
+
+      The `z-field` component may be used as a field wrapper. It accepts `errors` array from validation rules, or even a single `errors[0].$message` if desired. `z-field` can wrap any other UI components, and act as a decorator for error feedback.
+
+      ``` html
+        <z-field
+          v-for="(field, key, index) in form"
+          :key="'field-' + key"
+          :label="key"
+          :errors="field.$errors"
+          :hint="'Type in something for ' + key"
+        >
+          <input v-model="field.$model" />
+        </z-field>
+      ```
+
+    </section>
+  -->
+
+    <section data-nav="Examples" id="examples">
+      <div class="container" id="app">
+        <h2>Examples</h2>
+        <p class="mb-4 text-sm">note: examples use `@input` to evaluate immediately. you may prefer to use @change</span>
+        <form id="validationApp" @submit.prevent="submit">
+        <div class="md:grid grid-cols-2">
+          <z-input
+            v-model="form.username.$model"
+            label="Username"
+            hint="Choose a username"
+            placeholder="username"
+            :error="form.username.$error ? 'Username needs to be at least 3 characters' : ''"
+          ></z-input>
+          <pre class="text-sm p-4">{{ form.username }}</pre>
+
+          <z-input
+            v-model="form.email.$model"
+            label="Email"
+            type="email"
+            hint="Type in email"
+            :error="form.email.$error ? 'Email must be valid' : ''"
+          ></z-input>
+          <pre class="text-sm p-4">{{ form.email }}</pre>
+
+          <z-input
+            v-model="form.password.$model"
+            label="Password"
+            hint="Create a password"
+            :error="form.password.$error ? 'This is required field' : ''"
+          ></z-input>
+          <pre class="text-sm p-4">{{ form.password }}</pre>
+
+          <z-input
+            v-model="form.samePassword.$model"
+            label="Password again"
+            hint="confirm password"
+            :error="!form.samePassword.matches ? 'password must match' : ''"
+          ></z-input>
+          <pre class="text-sm p-4">{{ form.samePassword }}</pre>
+
+          <!--
+          <h4>dynamic form elements:</h4><hr>
+          <z-select
+            v-model="form.seniority.$model"
+            label="What's your level of seniority"
+            hint="Please choose level of seniority"
+            :error="form.seniority.$error ? 'This is required' : ''"
+            :options="[
+              { name: 'Junior (<= 2 years)', id: 'junior' },
+              { name: 'Mid (> 2 & <= 10 years)', id: 'mid' },
+              { name: 'Senior (10+ years)', id: 'senior' }
+            ]"
+          ></z-select>
+          <pre class="text-small">{{ form.seniority }}</pre>
+
+
+          <template v-if="form.seniority.$model.id === 'senior'">
+          <z-select
+            v-model="form.accomplishment.$model"
+            label="Proudest accomplishment"
+            :error-text="form.accomplishment.$error ? 'Error' : ''"
+            :options="values.accomplishment"
+          ></z-select>
+          <pre class="text-small">{{ form.accomplishment }}</pre>
+          </template>
+
+          <div class="align-self-start"><button>Submit</button></div>
+          <pre class="text-small">All form results:\n$errors: {{ form.$errors }}\n$invalid: {{ form.$invalid }}\n$dirty: {{ form.$dirty }}</pre>
+        -->
+
+            <div><button @click="submit.prevent" class="bg-blue-500 font-bold text-white px-4 py-3">submit</button></div>
+
+          </div>
+          <!--
+          <hr>
+          <p>Fake a server response, below. This will generate a "response" that will return in 1 second with server-side generated errors. These are automatically applied to the view, with no further action required.</p>
+
+          <label class="block font-bold mb-1 input-label">Server-generated errors</label>
+          <input
+            class="p-2 mr-2 rounded border"
+            label="quantity"
+            :value="form.quantity.$model"
+            @change="handleQuantityChange"
+          ></input>
+          <span class="text-sm">This is will always generate an error.</span>
+
+          <p class="mt-4">See the README for examples of how this works</p>
+          -->
+        </form>
+      </div>
+    </section>
+
+
+    <section data-nav="References" id="references">
+      <div class="container">
+        <h2>References</h2>
+        <p><code>Validatable</code> draws inspiration from multiple sources.</p>
+        <ul>
+          <li><a href="https://pikax.me/vue-composable/composable/validation/validation.html">Vue Composable</a>: Vue 3 composition API approach to validation</li>
+          <li><a href="https://logaretm.github.io/vee-validate/">Vee Validate</a>: Vue 3 composition API + "validation provider" component</li>
+          <li><a href="https://github.com/vuelidate/vuelidate/blob/master/src/index.js">Vuelidate</a> for model based validation</li>
+          <li><a href="https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/mixins/validatable/index.ts">Vuetify</a>: Array validation approach</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+    </div>
+  </footer>
+
+
+  <script type="module">
+    // *see: https://github.com/apathetic/validation/tree/gh-pages/test
+    import { Vue } from './js/demo.bundle.js';
+    import useValidation from './js/demo.bundle.js';
+    import { schema, values } from './js/fixture.bundle.js';
+    import { ZInput, ZSelect, ZField, SERVER_ERROR } from './js/helpers.bundle.js';
+
+    const validationApp2 = {
+      name: 'validation-demo',
+      setup() {
+        // const { form } = useValidation(schema, values); // you can set values immediately, too
+        const { form, setValues, setErrors } = useValidation(schema);
+        const vals = setValues(values);
+
+        const methods = {
+          submit() {
+            alert(`${ form.$invalid ? 'invalid form':'submitted!' }`);
+          },
+
+          async handleQuantityChange({ target }) {
+            form.quantity.$model = target.value;
+
+            try {
+              await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  target.value == '34X9' ? resolve() :
+                  reject(SERVER_ERROR);
+                }, 1000);
+              });
+            } catch (e) {
+              setErrors(e); // here, note we set $errors on the imported object, not on the component (ie. via `this`)
+            }
+          },
+        };
+
+
+        return {
+          // vals,
+          form,
+          ...methods
+        };
+      }
+    };
+
+
+    // VUE 3
+    Vue
+      .createApp(validationApp2)
+      .component('z-field', ZField)
+      .component('z-input', ZInput)
+      .component('z-select', ZSelect)
+      .mount('#app');
+
+
+    // const validationApp3 = {
+    //   name: 'validation-zfield',
+    //   setup() {
+    //     const { form } = useValidation(schema, values);
+
+    //     return {
+    //       form,
+    //     };
+    //   }
+    // };
+
+
+
+    // VUE 2 w/ composition API
+    /* * /
+    const { form, setValues, setErrors } = useValidation(schema);
+    const validationApp = {
+      name: 'validation-demo',
+      template:'#validationApp',
+
+      data() {
+        return {
+          values: setValues({ ...values }),
+        };
+      },
+
+      computed: {
+        form: () => form,
+      },
+
+      methods: { ...methods },
+    };
+
+    Vue.component('z-field', ZField)
+    Vue.component('z-input', ZInput)
+    Vue.component('z-select', ZSelect)
+
+    new Vue({ render: (h) => h(validationApp) }).$mount('#validationApp');
+    /* */
+  </script>
+
+
+  <script src="https://rawgit.com/apathetic/stickynav/master/dist/stickynav.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      new StickyNav({ nav: '#sticky' });
+    });
+  </script>
+</body>
+</html>

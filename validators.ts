@@ -1,10 +1,11 @@
 // https://github.com/vuelidate/vuelidate/tree/next/packages/validators
 import { email, required /* sameAs, minLength */, helpers } from '@vuelidate/validators/dist/index.esm';
+import { unwrap } from './validation';
 import { Validator } from './types';
 
 
 const sameAs = (field) => ({
-  $validator: (value, context) => value === context[field].$model,
+  $validator: (value, context) => value === unwrap(context[field].$model),
   $message: `This needs to be the same as the ${field} field.`,
 }) as Validator;
 

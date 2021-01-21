@@ -1,0 +1,35 @@
+
+    pre { white-space: pre-wrap; }
+
+    .has-error input { border-color: red; }
+    .has-error span { color: red; }
+
+    @media (min-width: 960px) {
+      body {
+        display: grid;
+        grid-template:
+          "b c" 1fr
+          "d d" 64px /
+          240px 1fr;
+      }
+      #sticky {
+        position: sticky !important;
+        left: 0 !important;
+      }
+      #sticky nav a {
+        background: #494d50;
+      }
+    }
+    header.condensed {
+      margin: 0;
+    }
+
+    footer {
+      grid-column-end: -1;
+      background: repeating-linear-gradient(
+        45deg,
+        rgb(244 244 244),
+      rgb(244,244,244) 16px,
+      #a2a2a2 18px
+      );
+    }

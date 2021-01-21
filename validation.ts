@@ -17,14 +17,15 @@
 
  */
 
-import { ref, reactive, computed, isRef } from 'vue-demi';
+import { ref, reactive, computed, isRef, isReactive, /*isVue2,*/ } from 'vue-demi';
 import { ValidationSchema, ValidationGroup, ValidationField, UseValidation } from './types';
+let isVue2 = false;
 
 /**
  * Helper function to access value of a reactive prop
  * @param val
  */
-function unwrap (val) {
+export function unwrap (val) {
   return isRef(val)
     ? val.value
     : val;
@@ -87,12 +88,12 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
         .some((x) => !!unwrap(x.$invalid));
     });
 
-    return reactive({
+    return {
       ...group,
       $errors,
       $invalid,
       $dirty,
-    });
+    };
   }
 
 
@@ -123,10 +124,10 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
     );
 
     const $model = computed({
-      get: () => unwrap(values![property]),
+      get: () => unwrap(values[property]),
       set: (val) => {
         $dirty.value = true;
-        values![property] = val;
+        values[property] = val;
       },
     });
 
@@ -153,14 +154,15 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
   /**
   * Parse a server-supplied Error reponse object, in JSON Error format, and
   * apply it to the relevant fields within the generated form.
-  * @param {object} values A data object containing the values to be validated.
+  * @param {object} vals A data object containing the values to be validated.
   * @returns {object} The object of form values, useful for composition.
   */
   function setValues(vals) {
-    const validations = buildGroup(schema, vals);
+    values = isReactive(vals) ? vals : reactive(vals);
+
+    const validations = buildGroup(schema, values);
 
     Object.defineProperties(form, Object.getOwnPropertyDescriptors(validations));
-    values = vals;
 
     return vals;
   }
@@ -192,10 +194,8 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
     return form;
   }
 
-
-
   return {
-    form,
+    form: isVue2 ? form : reactive(form),
     setValues,
     setErrors,
   } as any;
