@@ -1,6 +1,6 @@
 {
   "name": "@apatheticwes/validation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight schema-based validation librarie, with a holistic approach to asynchronicity",
   "main": "index.js",
   "scripts": {
