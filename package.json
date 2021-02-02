@@ -2,7 +2,7 @@
   "name": "@apatheticwes/validation",
   "version": "1.0.1",
   "description": "A lightweight schema-based validation librarie, with a holistic approach to asynchronicity",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc -b && rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
