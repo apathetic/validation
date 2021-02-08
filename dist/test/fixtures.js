@@ -27,18 +27,7 @@ export const schema = {
         required,
         matches: sameAs('password'),
     },
-    quantity: {
-        required,
-    },
-    seniority: {
-        required,
-    },
-    accomplishment: {
-        custom: {
-            $validator: (val) => val.id === '2',
-            $message: 'The answer is div',
-        },
-    },
+    quantity: {},
 };
 export const formSchema = {
     username: {

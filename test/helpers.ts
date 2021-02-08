@@ -3,7 +3,7 @@ export const SERVER_ERROR = [
     'status': '422',
     'source': { 'pointer': '/quantity' },
     'title':  'Invalid',
-    'detail': '(from ye olde server) There is insufficient quantity.',
+    'detail': '(from server) The secret code must match "34X9".',
   },
 ];
 

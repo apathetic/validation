@@ -32,6 +32,7 @@
       <div class="container">
         <h2>Overview</h2>
         <p><em>A lightweight, schema-based validation composable for Vue 3. It takes a more holistic approach to asynchronous validation.</em></p>
+        <p>See the <a href="https://github.com/apathetic/validation/blob/master/README.md">README</a> for full details.</p>
         <h4>At a Glance</h3>
         <ul class="bullets">
           <li><strong>Schema-based</strong>. Import rules and structure, keeping the component lean</li>
@@ -155,7 +156,6 @@
         ...
       ```
 
-      Note the similarities with [vuelidate](https://github.com/vuelidate), from which this structure was borrowed.
 
 
     </section>
@@ -286,24 +286,34 @@
           <pre class="text-small">All form results:\n$errors: {{ form.$errors }}\n$invalid: {{ form.$invalid }}\n$dirty: {{ form.$dirty }}</pre>
         -->
 
-            <div><button @click="submit.prevent" class="bg-blue-500 font-bold text-white px-4 py-3">submit</button></div>
-
           </div>
-          <!--
+          <!-- -- >
           <hr>
-          <p>Fake a server response, below. This will generate a "response" that will return in 1 second with server-side generated errors. These are automatically applied to the view, with no further action required.</p>
+          <p>Fake a server response, below. Changing the `value` will trigger a call to a fake API, which will return in 1 second with a server-side generated error. It's automatically applied to the view.</p>
+          <p>See the README for examples of how this works.</p>
 
-          <label class="block font-bold mb-1 input-label">Server-generated errors</label>
-          <input
-            class="p-2 mr-2 rounded border"
-            label="quantity"
-            :value="form.quantity.$model"
-            @change="handleQuantityChange"
-          ></input>
-          <span class="text-sm">This is will always generate an error.</span>
+          <div :class="{ 'has-error': form.quantity.$error }">
+            <label class="block font-bold mb-1 input-label">Server-generated errors</label>
+            <input
+              class="p-2 mr-2 rounded border"
+              label="quantity"
+              :value="form.quantity.$model"
+              @change="handleQuantityChange"
+            ></input>
+            <ul>
+              <li>{{ form.quantity.$dirty }}</li>
+              <li class="text-sm" v-for="err in form.quantity.$errors"><span>{{ err.$message }}</span></li>
+            </ul>
+          </div>
+          <! -- -->
 
-          <p class="mt-4">See the README for examples of how this works</p>
-          -->
+          <hr>
+          <button @click="submit.prevent" class="bg-blue-500 font-bold text-white px-4 py-3">submit</button>
+          <ul :class="`block mt-4 pl-2 border-l-4 border-solid ${form.$errors.length ? 'border-red-500' : 'border-green-500'}`">
+            <li>invalid: {{ form.$invalid}}</li>
+            <li v-for="e in form.$errors">error: ({{ e.$property }}) {{ e.$message }}</li>
+          </div>
+
         </form>
       </div>
     </section>
@@ -342,9 +352,13 @@
         // const { form } = useValidation(schema, values); // you can set values immediately, too
         const { form, setValues, setErrors } = useValidation(schema);
         const vals = setValues(values);
-
         const methods = {
           submit() {
+
+            Object.keys(form)
+              .filter(x => x[0] != '$')
+              .forEach(x => form[x].$dirty = true);
+
             alert(`${ form.$invalid ? 'invalid form':'submitted!' }`);
           },
 
@@ -354,8 +368,8 @@
             try {
               await new Promise((resolve, reject) => {
                 setTimeout(() => {
-                  target.value == '34X9' ? resolve() :
-                  reject(SERVER_ERROR);
+                  console.log('server response received!');
+                  target.value == '34X9' ? resolve() : reject(SERVER_ERROR);
                 }, 1000);
               });
             } catch (e) {
@@ -364,6 +378,7 @@
           },
         };
 
+        window.form = form;
 
         return {
           // vals,
@@ -381,18 +396,6 @@
       .component('z-input', ZInput)
       .component('z-select', ZSelect)
       .mount('#app');
-
-
-    // const validationApp3 = {
-    //   name: 'validation-zfield',
-    //   setup() {
-    //     const { form } = useValidation(schema, values);
-
-    //     return {
-    //       form,
-    //     };
-    //   }
-    // };
 
 
 

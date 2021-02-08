@@ -34,8 +34,9 @@ export const schema: Readonly<ValidationSchema> = {
     matches: sameAs('password'),
   },
   quantity: {
-    required,
+    // required,
   },
+  /*
   seniority: {
     required,
   },
@@ -45,6 +46,7 @@ export const schema: Readonly<ValidationSchema> = {
       $message: 'The answer is div',
     },
   },
+  */
 };
 
 // validations + values together

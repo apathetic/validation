@@ -29,9 +29,8 @@ function useValidation(schema, values) {
         }
         $errors = computed(() => {
             return validations
-                .filter((v) => unwrap(v).$errors.length)
                 .reduce((errors, v) => {
-                return errors.concat(...unwrap(v).$errors);
+                return errors.concat(...unwrap(v.$errors));
             }, []);
         });
         $dirty = computed(() => {
@@ -94,16 +93,14 @@ function useValidation(schema, values) {
     function setErrors(errors) {
         errors.forEach((error) => {
             const [, field] = error.source?.pointer?.split('/') || 'form';
-            schema[field] || {};
-            form[field].$errors = computed(() => {
-                const errs = form[field].$errors.value;
-                errs.push({
-                    $message: error.detail,
-                    $validator: () => form[field].$dirty
-                });
-                return errs;
-            });
-            form[field].$dirty = true;
+            const rules = schema[field] || (schema[field] = {});
+            rules['server'] = {
+                $message: error.detail,
+                $validator: () => form[field].$dirty
+            };
+            const validations = buildGroup(schema, values);
+            Object.defineProperties(form, Object.getOwnPropertyDescriptors(validations));
+            form[field].$dirty = false;
         });
         return form;
     }
