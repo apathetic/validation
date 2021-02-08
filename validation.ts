@@ -72,9 +72,9 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
 
     $errors = computed(() => {
       return validations
-        .filter((v) => unwrap(v).$errors.length)
+        // .filter((v) => unwrap(v.$errors).length)
         .reduce((errors, v) => {
-          return errors.concat(...unwrap(v).$errors);
+          return errors.concat(...unwrap(v.$errors));
         }, []);
     });
 
@@ -185,7 +185,8 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
         $validator: () => form[field].$dirty // just go away once user interacts with field (since we we're not able to validate it client-side)
       };
 
-      const validations = buildGroup({[field]: rules}, values);
+      // const validations = buildGroup({[field]: rules}, values);
+      const validations = buildGroup(schema, values);
 
       Object.defineProperties(form, Object.getOwnPropertyDescriptors(validations));
       form[field].$dirty = false; // ?
