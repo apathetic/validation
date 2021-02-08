@@ -4,7 +4,7 @@ import replace from '@rollup/plugin-replace';
 
 export default {
   input: {
-    'demo.bundle': 'dist/index.js',
+    'demo.bundle': 'demo.js',
     'fixture.bundle': 'dist/test/fixtures.js',
   },
   output: {

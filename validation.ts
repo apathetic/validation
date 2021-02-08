@@ -155,7 +155,7 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
   * Parse a server-supplied Error reponse object, in JSON Error format, and
   * apply it to the relevant fields within the generated form.
   * @param {object} vals A data object containing the values to be validated.
-  * @returns {object} The object of form values, useful for composition.
+  * @returns {object} The same object of data values, useful for further composition.
   */
   function setValues(vals) {
     values = isReactive(vals) ? vals : reactive(vals);
@@ -176,20 +176,20 @@ export default function useValidation<S, V>(schema: ValidationSchema, values?: a
   * @see https://jsonapi.org/examples/
   */
   function setErrors(errors) {
-    return;
     errors.forEach((error) => {
       const [,field] = error.source?.pointer?.split('/') || 'form'; // if we don't find a particular field, set a generic "form" error
-      const value = form[field]?.$model;
-      const rules = schema[field] || {};
+      const rules = schema[field] || (schema[field] = {});
 
       rules['server'] = {
         $message: error.detail,
-        $validator: () => false, // form[field].$dirty // ...just go away once user interacts with field ?
+        $validator: () => form[field].$dirty // just go away once user interacts with field (since we we're not able to validate it client-side)
       };
-      form[field].$dirty = true; // otherwise no validation happens
-    });
 
-    // Object.defineProperties(form, Object.getOwnPropertyDescriptors(xxx));
+      const validations = buildGroup({[field]: rules}, values);
+
+      Object.defineProperties(form, Object.getOwnPropertyDescriptors(validations));
+      form[field].$dirty = false; // ?
+    });
 
     return form;
   }
